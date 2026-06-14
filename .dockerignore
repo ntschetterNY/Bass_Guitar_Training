@@ -1,0 +1,17 @@
+# Keep the Docker build context small
+**/node_modules
+**/dist
+**/__pycache__
+**/.venv
+**/venv
+**/*.pyc
+data/
+*.db
+*.sqlite*
+.git
+.github
+*.md
+!README.md
+.env*
+frontend/node_modules
+backend/static/*

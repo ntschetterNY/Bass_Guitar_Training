@@ -1,0 +1,23 @@
+# Dockge stack for the Bass & Guitar Training app.
+#
+# Copy this file into a stack folder in Dockge (e.g. /opt/stacks/bass-guitar-training/),
+# set IMAGE + DATA_PATH below (or via a .env file next to it), then deploy.
+# Update workflow: push to GitHub -> Actions builds & pushes to GHCR -> click
+# "Update" in Dockge (pull + recreate).
+
+services:
+  app:
+    # Built by GitHub Actions and pushed to GHCR. Make the GHCR package Public
+    # so the NAS can pull with no login.
+    image: ${IMAGE:-ghcr.io/ntschetterny/bass_guitar_training:latest}
+    container_name: bass-guitar-training
+    restart: unless-stopped
+    # UID:GID the container runs as. Set this to match the owner of DATA_PATH on
+    # the NAS. The Bass_Guitar dataset is currently root:root, so PUID/PGID=0
+    # works out of the box; switch to 1000:1000 if you chown the dataset.
+    user: "${PUID:-0}:${PGID:-0}"
+    ports:
+      - "${HOST_PORT:-8080}:8000"
+    volumes:
+      # SQLite DB lives on the TrueNAS dataset (Host Path) so it survives updates.
+      - ${DATA_PATH:-/mnt/tank/configs/Bass_Guitar}:/app/data
