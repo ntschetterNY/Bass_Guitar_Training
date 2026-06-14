@@ -148,3 +148,246 @@ body {
 .health--down {
   color: var(--down);
 }
+
+/* --- Buttons / form controls --- */
+.btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 18px;
+  font: inherit;
+  cursor: pointer;
+}
+.btn:hover {
+  background: var(--surface-hover);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1205;
+  font-weight: 600;
+}
+.select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font: inherit;
+}
+.small {
+  font-size: 0.85rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* --- Input panel + level meter --- */
+.input-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+.input-panel--row {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.meter {
+  flex: 1;
+  min-width: 120px;
+  height: 12px;
+  background: #0c0e12;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.meter__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ok), var(--accent));
+  transition: width 0.06s linear;
+}
+
+/* --- Tuner --- */
+.tuner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.tuner__note {
+  font-size: 4.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.tuner__note--ok {
+  color: var(--ok);
+}
+.tuner__gauge {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 60px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.tuner__center {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--muted);
+  transform: translateX(-50%);
+}
+.tuner__needle {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 4px;
+  background: var(--accent);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transition: left 0.08s ease-out;
+}
+.tuner__needle--ok {
+  background: var(--ok);
+}
+.tuner__scale {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 420px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.string-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.pill {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  color: var(--muted);
+}
+.pill--active {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* --- Metronome --- */
+.metronome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.beats {
+  display: flex;
+  gap: 12px;
+}
+.beat {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.beat--accent {
+  border-color: var(--muted);
+}
+.beat--on {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+.bpm {
+  font-size: 2rem;
+  font-weight: 700;
+}
+.metronome input[type="range"] {
+  width: 100%;
+  max-width: 420px;
+}
+.metronome__controls {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+/* --- Note trainer --- */
+.trainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.trainer__stats {
+  display: flex;
+  gap: 24px;
+  color: var(--muted);
+}
+.trainer__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 48px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.trainer__card--hit {
+  border-color: var(--ok);
+  background: #15241d;
+}
+.trainer__target {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.trainer__feedback {
+  color: var(--muted);
+  min-height: 1.4em;
+}
+.trainer__feedback.ok {
+  color: var(--ok);
+}
+.trainer__actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* --- Live detector --- */
+.detector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.detector__big {
+  font-size: 5rem;
+  font-weight: 700;
+  line-height: 1.1;
+}

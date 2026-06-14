@@ -40,14 +40,13 @@ export default function InstrumentHome() {
           <span className="badge">Coming in Phase 2</span>
         </div>
 
-        <div className="card card--static">
+        <Link to={`/${inst}/tools`} className="card">
           <span className="card__emoji">🛠️</span>
           <span className="card__title">Tools</span>
           <span className="card__subtitle">
-            Tuner · metronome · fretboard · songs
+            Tuner · metronome · note trainer · detector
           </span>
-          <span className="badge">Coming in Phase 1</span>
-        </div>
+        </Link>
       </div>
     </main>
   );

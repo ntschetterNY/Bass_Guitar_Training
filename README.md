@@ -4,11 +4,21 @@ A self-hosted web app to learn **bass** and **acoustic/electric guitar** using a
 **Focusrite USB-C** interface for live audio feedback. Runs in the browser on an
 iPad or computer, hosted on TrueNAS via Dockge.
 
-> **Status: Phase 0** — app skeleton + deployment pipeline. The home screen lets
-> you pick an instrument profile (Bass / Guitar). Audio tools (Phase 1), the
-> interactive lesson engine + curriculum (Phase 2), and songs (Phase 3) come
-> next. See the full plan in
+> **Status: Phase 1** — app skeleton + deploy pipeline (Phase 0) plus the audio
+> foundation and tools. Pick an instrument profile, then open **Tools**:
+> **Tuner**, **Metronome**, **Note Trainer** (interactive fretboard drill with
+> live detection), and a **Live Detector** (note readout for bass, experimental
+> chord readout for guitar). Audio comes from the Focusrite via the browser
+> (`getUserMedia` + an `AnalyserNode`); bass/single-note pitch uses
+> [`pitchy`](https://github.com/ianprime0509/pitchy), guitar chords use a
+> chromagram + template matcher. The interactive lesson engine + curriculum
+> (Phase 2) and songs (Phase 3) come next. Full plan:
 > `~/.claude/plans/greedy-dreaming-quasar.md`.
+>
+> **Audio note:** the browser tab needs microphone permission, and the site must
+> be served over HTTPS or `localhost` for `getUserMedia` to work. On your LAN
+> over plain HTTP, use it from the NAS via `localhost` tunnels or put it behind
+> HTTPS (a reverse proxy) — see *Phase 1 caveat* below.
 
 ## Architecture
 
@@ -84,6 +94,27 @@ NAS.
 
 The SQLite database persists across updates because it lives on the bind-mounted
 dataset, not inside the container.
+
+## Phase 1 caveat: microphone needs a secure context
+
+Browsers only grant `getUserMedia` (audio input) on **HTTPS** or **`localhost`**.
+Opening `http://<nas-ip>:8090` over plain HTTP will load the app but the audio
+tools **won't be able to access the Focusrite** — the "Enable input" button will
+fail with a permission/security error.
+
+Options to get a secure context:
+
+- **Reverse proxy with HTTPS (recommended).** Put the app behind a proxy that
+  terminates TLS (Traefik, Nginx Proxy Manager, Caddy) on a hostname like
+  `https://bass.home.lan` or a real domain. You likely already run one for your
+  other TrueNAS apps — just add this service. The container itself stays plain
+  HTTP on port 8000; the proxy handles the cert.
+- **Tailscale / Cloudflare Tunnel** also provide HTTPS to the app.
+- **Quick local test:** `http://localhost:8090` works on the same machine the
+  container runs on (no cert needed), which is enough to verify the build.
+
+This only matters for the audio features (Phase 1+). Phase 0 navigation works
+over plain HTTP.
 
 ## Project layout
 
