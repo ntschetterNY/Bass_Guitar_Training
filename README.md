@@ -71,10 +71,10 @@ NAS.
    [`compose.yaml`](compose.yaml), and create a `.env` (see
    [`.env.example`](.env.example)) with:
    - `IMAGE=ghcr.io/ntschetterny/bass_guitar_training:latest`
-   - `HOST_PORT=8080`
+   - `HOST_PORT=8090`
    - `DATA_PATH=/mnt/tank/configs/Bass_Guitar`
    - `PUID=0` / `PGID=0`
-5. Deploy. Open `http://<nas-ip>:8080`.
+5. Deploy. Open `http://<nas-ip>:8090`.
 
 ### Update workflow
 

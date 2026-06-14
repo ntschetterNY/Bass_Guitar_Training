@@ -17,7 +17,7 @@ services:
     # works out of the box; switch to 1000:1000 if you chown the dataset.
     user: "${PUID:-0}:${PGID:-0}"
     ports:
-      - "${HOST_PORT:-8080}:8000"
+      - "${HOST_PORT:-8090}:8000"
     volumes:
       # SQLite DB lives on the TrueNAS dataset (Host Path) so it survives updates.
       - ${DATA_PATH:-/mnt/tank/configs/Bass_Guitar}:/app/data
