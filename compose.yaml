@@ -16,8 +16,44 @@ services:
     # the NAS. The Bass_Guitar dataset is currently root:root, so PUID/PGID=0
     # works out of the box; switch to 1000:1000 if you chown the dataset.
     user: "${PUID:-0}:${PGID:-0}"
+    expose:
+      - "8000"
     ports:
+      # Plain HTTP — fine on a desktop/localhost, but iOS will NOT grant mic
+      # access over this (use the HTTPS service below on the iPad).
       - "${HOST_PORT:-8090}:8000"
     volumes:
       # SQLite DB lives on the TrueNAS dataset (Host Path) so it survives updates.
       - ${DATA_PATH:-/mnt/tank/configs/Bass_Guitar}:/app/data
+
+  # HTTPS front door so the iPad (iOS Safari) can use the microphone/Focusrite.
+  # iOS only exposes getUserMedia in a secure context, which over a LAN IP means
+  # HTTPS. Caddy terminates TLS with a self-signed cert from its built-in local
+  # CA and proxies to the app — no backend changes, no extra config files.
+  # On the iPad, browse to https://<SITE_ADDRESS>:<HTTPS_PORT> (see README).
+  https:
+    image: caddy:2-alpine
+    container_name: bass-guitar-training-https
+    restart: unless-stopped
+    depends_on:
+      - app
+    command:
+      - caddy
+      - reverse-proxy
+      - --from
+      - https://${SITE_ADDRESS:-192.168.3.148}
+      - --to
+      - app:8000
+      - --internal-certs
+    ports:
+      - "${HTTPS_PORT:-8443}:443"
+    volumes:
+      # Persist Caddy's local CA so the cert stays stable across restarts (and
+      # so you only have to trust it on the iPad once). Its root certificate is
+      # at caddy_data:/data/caddy/pki/authorities/local/root.crt.
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

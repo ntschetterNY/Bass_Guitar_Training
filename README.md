@@ -16,9 +16,9 @@ iPad or computer, hosted on TrueNAS via Dockge.
 > `~/.claude/plans/greedy-dreaming-quasar.md`.
 >
 > **Audio note:** the browser tab needs microphone permission, and the site must
-> be served over HTTPS or `localhost` for `getUserMedia` to work. On your LAN
-> over plain HTTP, use it from the NAS via `localhost` tunnels or put it behind
-> HTTPS (a reverse proxy) — see *Phase 1 caveat* below.
+> be served over HTTPS or `localhost` for `getUserMedia` to work. On the iPad,
+> use the bundled HTTPS service — see
+> *[Using it on the iPad](#using-it-on-the-ipad-microphone-needs-https)* below.
 
 ## Architecture
 
@@ -95,26 +95,49 @@ NAS.
 The SQLite database persists across updates because it lives on the bind-mounted
 dataset, not inside the container.
 
-## Phase 1 caveat: microphone needs a secure context
+## Using it on the iPad: microphone needs HTTPS
 
-Browsers only grant `getUserMedia` (audio input) on **HTTPS** or **`localhost`**.
-Opening `http://<nas-ip>:8090` over plain HTTP will load the app but the audio
-tools **won't be able to access the Focusrite** — the "Enable input" button will
-fail with a permission/security error.
+Browsers only grant `getUserMedia` (audio input) in a **secure context** —
+**HTTPS** or **`localhost`**. Opening `http://<nas-ip>:8090` over plain HTTP
+loads the app but iOS will **not** let it touch the Focusrite; "Enable input"
+fails with `undefined is not an object (...getUserMedia)`.
 
-Options to get a secure context:
+The compose stack includes a small **Caddy** HTTPS service that fixes this with
+no backend changes — it terminates TLS with a self-signed certificate from its
+built-in local CA and proxies to the app.
 
-- **Reverse proxy with HTTPS (recommended).** Put the app behind a proxy that
-  terminates TLS (Traefik, Nginx Proxy Manager, Caddy) on a hostname like
-  `https://bass.home.lan` or a real domain. You likely already run one for your
-  other TrueNAS apps — just add this service. The container itself stays plain
-  HTTP on port 8000; the proxy handles the cert.
-- **Tailscale / Cloudflare Tunnel** also provide HTTPS to the app.
-- **Quick local test:** `http://localhost:8090` works on the same machine the
-  container runs on (no cert needed), which is enough to verify the build.
+### Setup
 
-This only matters for the audio features (Phase 1+). Phase 0 navigation works
-over plain HTTP.
+1. In your `.env` (next to `compose.yaml`) set the address the iPad will use:
+   - `SITE_ADDRESS=192.168.3.148` — the NAS LAN IP (must match what you type).
+   - `HTTPS_PORT=8443` — the LAN port for the secure URL.
+   *(Tip: give the NAS a static/reserved IP so the cert keeps matching.)*
+2. Deploy/Update the stack in Dockge.
+3. On the iPad, open **`https://192.168.3.148:8443`** (note **https** and the
+   `8443` port).
+
+### Trusting the certificate on iOS
+
+Because the cert is self-signed, iOS shows a warning the first time:
+
+- **Quick path:** tap **Show Details → visit this website → Visit Website**.
+  After you proceed, the page is a secure context and "Enable input" works.
+- **If the mic is still blocked** (some iOS versions won't expose input for a
+  cert-warning page), install Caddy's local CA once so the site is fully trusted:
+  1. On the NAS, copy the root cert out of the `https` container:
+     ```bash
+     docker cp bass-guitar-training-https:/data/caddy/pki/authorities/local/root.crt ./bgt-root.crt
+     ```
+  2. Get `bgt-root.crt` onto the iPad (AirDrop / email it to yourself) and open
+     it → **Allow** the profile download.
+  3. **Settings → General → VPN & Device Management** → tap the profile →
+     **Install**.
+  4. **Settings → General → About → Certificate Trust Settings** → toggle the
+     Caddy root cert **on**.
+  5. Reload `https://192.168.3.148:8443` — no warning, mic works.
+
+The plain-HTTP URL (`http://<nas-ip>:8090`) still works for desktop/localhost and
+non-audio navigation; use the HTTPS URL on the iPad for the audio tools.
 
 ## Project layout
 
