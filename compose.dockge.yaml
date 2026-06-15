@@ -1,0 +1,48 @@
+# Dockge stack for the Bass & Guitar Training app (self-contained, no .env).
+# Paste into the stack, Save, then Update/Start.
+
+services:
+  app:
+    image: ghcr.io/ntschetterny/bass_guitar_training:latest
+    container_name: bass-guitar-training
+    restart: unless-stopped
+    # Runs as root so it can write the root:root TrueNAS dataset as-is.
+    user: "0:0"
+    expose:
+      - "8000"
+    ports:
+      # Plain HTTP — works on desktop/localhost. iOS will NOT grant mic access
+      # over this; use the HTTPS service (port 8443) on the iPad.
+      - "8090:8000"
+    volumes:
+      # SQLite DB on the TrueNAS dataset so it survives updates.
+      - /mnt/tank/configs/Bass_Guitar:/app/data
+
+  # HTTPS front door so the iPad (iOS Safari) can use the microphone/Focusrite.
+  # Caddy terminates TLS with a self-signed cert from its built-in local CA
+  # and proxies to the app. On the iPad, open https://192.168.3.148:8443
+  https:
+    image: caddy:2-alpine
+    container_name: bass-guitar-training-https
+    restart: unless-stopped
+    depends_on:
+      - app
+    command:
+      - caddy
+      - reverse-proxy
+      - --from
+      - https://192.168.3.148
+      - --to
+      - app:8000
+      - --internal-certs
+    ports:
+      - "8443:443"
+    volumes:
+      # Persist Caddy's local CA so the cert stays stable across restarts.
+      # Root cert: /data/caddy/pki/authorities/local/root.crt
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
