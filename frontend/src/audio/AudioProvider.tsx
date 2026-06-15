@@ -91,6 +91,23 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         // Tear down any previous graph (e.g. when switching devices).
         teardown();
 
+        // Browsers only expose mediaDevices in a secure context (HTTPS or
+        // localhost). Over plain HTTP on a LAN IP — common for self-hosted
+        // setups — navigator.mediaDevices is undefined, so guard before use
+        // and surface an actionable message instead of a cryptic TypeError.
+        if (!navigator.mediaDevices?.getUserMedia) {
+          setStatus("error");
+          setError(
+            window.isSecureContext === false
+              ? "Audio input requires a secure connection. Open this page over " +
+                  "HTTPS or via http://localhost — browsers block microphone " +
+                  "access on plain HTTP (e.g. a LAN IP address)."
+              : "This browser does not support audio input " +
+                  "(navigator.mediaDevices is unavailable).",
+          );
+          return;
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia(
           constraints(deviceId),
         );
